@@ -1,4 +1,5 @@
 # logspout
+[![Circle CI](https://circleci.com/gh/remind101/logspout.svg?style=svg)](https://circleci.com/gh/remind101/logspout)
 Our version gliderlabs/logspout with custom modules.
 
 ## usage
