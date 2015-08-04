@@ -1,0 +1,6 @@
+dependencies:
+  pre:
+    - curl https://raw.githubusercontent.com/remind101/docker-build/fast/docker-build > /home/ubuntu/bin/docker-build
+    - chmod +x /home/ubuntu/bin/docker-build
+  override:
+    - docker-build
