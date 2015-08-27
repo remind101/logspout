@@ -7,5 +7,5 @@ import (
 	_ "github.com/gliderlabs/logspout/transports/tcp"
 	_ "github.com/gliderlabs/logspout/transports/udp"
 	_ "github.com/remind101/logspout-kinesis"
-	_ "github.com/remind101/logspout/adapters/syslog"
+	_ "github.com/remind101/logspout-syslog"
 )
