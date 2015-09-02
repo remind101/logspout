@@ -101,6 +101,10 @@
 			"Rev": "7f57927a99405e89d0d83f95d0f3be0e4842b261"
 		},
 		{
+			"ImportPath": "github.com/remind101/metrics",
+			"Rev": "7c0d3788e31b3e116bfafa6c6ffa10dad315420c"
+		},
+		{
 			"ImportPath": "github.com/shirou/gopsutil/common",
 			"Comment": "1.0.0-114-g47f6760",
 			"Rev": "47f6760cf36f1ee42b4adf32a201835eb5c2ae57"
