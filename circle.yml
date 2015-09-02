@@ -1,8 +1,27 @@
+machine:
+  services:
+    - docker
+
 dependencies:
+  pre:
+    - make circleci
   override:
     - curl https://raw.githubusercontent.com/remind101/docker-build/fast/docker-build > /home/ubuntu/bin/docker-build
     - chmod +x /home/ubuntu/bin/docker-build
+    - make build
+  post:
+    - cp build/* $CIRCLE_ARTIFACTS
 
 test:
   override:
-    - docker-build
+    - /bin/true
+
+deployment:
+  release:
+    branch: release
+    commands:
+      - make release
+  docker:
+    branch: /.*/
+    commands:
+      - docker-build

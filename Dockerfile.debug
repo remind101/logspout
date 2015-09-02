@@ -1,0 +1,12 @@
+FROM ubuntu
+VOLUME /mnt/routes
+EXPOSE 8000
+
+ENV GOPATH /go
+RUN apt-get install -y software-properties-common && add-apt-repository -y ppa:ethereum/ethereum && add-apt-repository -y ppa:ethereum/ethereum-dev && apt-get update && apt-get install -y git-core mercurial build-essential checkinstall golang libc6-dev gcc make
+
+COPY . /go/src/github.com/gliderlabs/logspout
+WORKDIR /go/src/github.com/gliderlabs/logspout
+RUN go get && go build -race -o /bin/logspout
+
+CMD /bin/logspout
