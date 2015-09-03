@@ -4,12 +4,10 @@ ENTRYPOINT ["/bin/logspout"]
 VOLUME /mnt/routes
 
 RUN apk add --update go git mercurial
-RUN mkdir -p /go/src/github.com/gliderlabs && \
-      go get github.com/gliderlabs/logspout
+RUN go get -u github.com/tools/godep
 
 COPY ./ /go/src/github.com/remind101/logspout
 RUN cd /go/src/github.com/remind101/logspout && \
-      go get && \
-      go install ./ && \
+      /go/bin/godep go install ./ && \
       mv /go/bin/logspout /bin/logspout
 MAINTAINER Ben Guillet <beng@remind101.com>
