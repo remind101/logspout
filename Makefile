@@ -1,7 +1,7 @@
 .PHONY: build run
 
 build:
-	docker build --no-cache -t remind101/logspout .
+	docker build -t remind101/logspout .
 
 run:
 	docker run --rm \
