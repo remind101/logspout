@@ -101,10 +101,6 @@
 			"Rev": "6fc8366175ae6ee46af8c7a9438a3f45ce5699d7"
 		},
 		{
-			"ImportPath": "github.com/remind101/logspout-syslog",
-			"Rev": "167a297dc72d6673f5d74eca62230efa06d4e866"
-		},
-		{
 			"ImportPath": "github.com/shirou/gopsutil/common",
 			"Comment": "1.0.0-114-g47f6760",
 			"Rev": "47f6760cf36f1ee42b4adf32a201835eb5c2ae57"
