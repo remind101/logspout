@@ -1,6 +1,7 @@
 package adapters
 
 import (
+	"os"
 	"sync"
 	"time"
 
@@ -9,6 +10,8 @@ import (
 )
 
 func init() {
+	hostname, _ := os.Hostname()
+	metrics.Source = hostname
 	router.AdapterFactories.Register(newMetricsAdapter, "metrics")
 }
 
