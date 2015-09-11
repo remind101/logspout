@@ -2,6 +2,7 @@ package kinesis
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 	"log"
 	"os"
@@ -15,18 +16,18 @@ var funcMap = template.FuncMap{
 	"lookUp": lookUp,
 }
 
-type missingEnvVarError struct {
+type MissingEnvVarError struct {
 	envVar string
 }
 
-func (e *missingEnvVarError) Error() string {
+func (e *MissingEnvVarError) Error() string {
 	return fmt.Sprintf("Missing required %s environment variable.\n", e.envVar)
 }
 
 func compileTmpl(envVar string) (*template.Template, error) {
 	tmplString := os.Getenv(envVar)
 	if tmplString == "" {
-		return nil, &missingEnvVarError{envVar: envVar}
+		return nil, &MissingEnvVarError{envVar: envVar}
 	}
 
 	tmpl, err := template.New("").Funcs(funcMap).Parse(tmplString)
@@ -37,7 +38,13 @@ func compileTmpl(envVar string) (*template.Template, error) {
 	return tmpl, nil
 }
 
+var ErrEmptyTmpl = errors.New("the template is empty")
+
 func executeTmpl(tmpl *template.Template, m *router.Message) (string, error) {
+	if tmpl == nil {
+		return "", ErrEmptyTmpl
+	}
+
 	var res bytes.Buffer
 	err := tmpl.Execute(&res, m)
 	if err != nil {
@@ -61,20 +68,12 @@ func lookUp(arr []string, key string) string {
 
 func logErr(err error) {
 	if err != nil {
-		log.Println("kinesis: ", err.Error())
+		log.Println("kinesis:", err.Error())
 	}
 }
 
-func logErrs(err []error) {
-	if err != nil {
-		for _, e := range err {
-			logErr(e)
-		}
-	}
-}
-
-func debugLog(format string, p ...interface{}) {
+func debug(format string, p ...interface{}) {
 	if os.Getenv("KINESIS_DEBUG") == "true" {
-		log.Printf(format, p...)
+		log.Printf("kinesis: "+format, p...)
 	}
 }
