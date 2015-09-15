@@ -10,37 +10,38 @@ import (
 	"github.com/pborman/uuid"
 )
 
+// ErrRecordTooBig is raised when a record is too big to be sent.
 var ErrRecordTooBig = errors.New("data byte size is over the limit")
 
 type limits struct {
-	// PutRecordsLimit is the maximum number of records allowed for a PutRecords request.
-	putRecords int
-
-	// PutRecordsSizeLimit is the maximum allowed size per PutRecords request.
+	putRecords     int
 	putRecordsSize int
-
-	// RecordSizeLimit is the maximum allowed size per record.
-	recordSize int
+	recordSize     int
 }
 
 const (
-	PutRecordsLimit     int = 500
+	// PutRecordsLimit is the maximum number of records allowed for a PutRecords request.
+	PutRecordsLimit int = 500
+
+	// PutRecordsSizeLimit is the maximum allowed size per PutRecords request.
 	PutRecordsSizeLimit int = 5 * 1024 * 1024 // 5MB
-	RecordSizeLimit     int = 1 * 1024 * 1024 // 1MB
+
+	// RecordSizeLimit is the maximum allowed size per record.
+	RecordSizeLimit int = 1 * 1024 * 1024 // 1MB
 )
 
 type buffer struct {
 	count    int
 	byteSize int
 	pKeyTmpl *template.Template
-	input    kinesis.PutRecordsInput
+	input    *kinesis.PutRecordsInput
 	limits   *limits
 }
 
 func newBuffer(tmpl *template.Template, sn string) *buffer {
 	return &buffer{
 		pKeyTmpl: tmpl,
-		input: kinesis.PutRecordsInput{
+		input: &kinesis.PutRecordsInput{
 			StreamName: aws.String(sn),
 			Records:    make([]*kinesis.PutRecordsRequestEntry, 0),
 		},
@@ -62,7 +63,7 @@ func (b *buffer) add(m *router.Message) error {
 
 	pKey, err := executeTmpl(b.pKeyTmpl, m)
 	if err != nil {
-		panic(err)
+		return err
 	}
 
 	// We default to a uuid if the template didn't match.
@@ -72,7 +73,7 @@ func (b *buffer) add(m *router.Message) error {
 	}
 
 	// Add to count
-	b.count += 1
+	b.count++
 
 	// Add data and partition key size to byteSize
 	b.byteSize += dataLen + len(pKey)
@@ -101,6 +102,10 @@ func (b *buffer) full(m *router.Message) bool {
 	}
 
 	return false
+}
+
+func (b *buffer) empty() bool {
+	return b.count == 0
 }
 
 func (b *buffer) reset() {

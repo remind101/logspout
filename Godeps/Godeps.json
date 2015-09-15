@@ -98,7 +98,7 @@
 		},
 		{
 			"ImportPath": "github.com/remind101/logspout-kinesis",
-			"Rev": "5e006f5f9f09d75d4ffe0143de4162967e17a2ea"
+			"Rev": "b22356286097bc24142388ed415a53e273372807"
 		},
 		{
 			"ImportPath": "github.com/shirou/gopsutil/common",

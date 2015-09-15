@@ -5,6 +5,7 @@ import (
 	"text/template"
 	"time"
 
+	"github.com/aws/aws-sdk-go/service/kinesis"
 	"github.com/gliderlabs/logspout/router"
 )
 
@@ -13,18 +14,30 @@ var m = &router.Message{
 }
 
 type fakeFlusher struct {
-	flushFunc func()
-	flushed   chan struct{}
+	inputs        chan kinesis.PutRecordsInput
+	dropInputFunc func(kinesis.PutRecordsInput)
+	flushFunc     func()
+	flushed       chan struct{}
 }
 
-func (f *fakeFlusher) flush(b buffer) error {
+func (f *fakeFlusher) start() {
+	f.flushInputs()
+}
+
+func (f *fakeFlusher) flush(input kinesis.PutRecordsInput) {
+	select {
+	case f.inputs <- input:
+	default:
+		f.dropInputFunc(input)
+	}
+}
+
+func (f *fakeFlusher) flushInputs() {
 	if f.flushFunc == nil {
 		close(f.flushed)
 	} else {
 		f.flushFunc()
 	}
-
-	return nil
 }
 
 var testLimits = limits{
@@ -33,20 +46,20 @@ var testLimits = limits{
 	recordSize:     RecordSizeLimit,
 }
 
-var tmpl, _ = template.New("").Parse("abc")
-
 func TestWriter_Flush(t *testing.T) {
+	tmpl, _ := template.New("").Parse("abc")
 	b := newBuffer(tmpl, "abc")
 	b.limits = &testLimits
 
 	f := &fakeFlusher{
+		inputs:  make(chan kinesis.PutRecordsInput, 10),
 		flushed: make(chan struct{}),
 	}
 
 	w := newWriter(b, f)
 	w.ticker = nil
 
-	w.Start()
+	w.start()
 
 	w.write(m)
 	w.write(m)
@@ -54,16 +67,18 @@ func TestWriter_Flush(t *testing.T) {
 
 	select {
 	case <-f.flushed:
-	case <-time.After(time.Second):
+	case <-time.After(1 * time.Second):
 		t.Fatal("Expected flush to be called")
 	}
 }
 
 func TestWriter_PeriodicFlush(t *testing.T) {
+	tmpl, _ := template.New("").Parse("abc")
 	b := newBuffer(tmpl, "abc")
 	b.limits = &testLimits
 
 	f := &fakeFlusher{
+		inputs:  make(chan kinesis.PutRecordsInput, 10),
 		flushed: make(chan struct{}),
 	}
 
@@ -72,7 +87,7 @@ func TestWriter_PeriodicFlush(t *testing.T) {
 	ticker := make(chan time.Time)
 	w.ticker = ticker
 
-	w.Start()
+	w.start()
 	w.write(m)
 
 	select {
@@ -85,41 +100,5 @@ func TestWriter_PeriodicFlush(t *testing.T) {
 	case <-f.flushed:
 	case <-time.After(time.Second):
 		t.Fatal("Expected flush to be called")
-	}
-}
-
-func TestWriter_BuffersChannelFull(t *testing.T) {
-	b := newBuffer(tmpl, "abc")
-	b.limits = &testLimits
-
-	f := &fakeFlusher{
-		flushed: make(chan struct{}),
-		flushFunc: func() {
-			<-time.After(time.Minute)
-		},
-	}
-
-	w := newWriter(b, f)
-	w.ticker = nil
-	w.buffers = make(chan buffer)
-	drop := make(chan struct{})
-	w.dropBufferFunc = func(b buffer) {
-		close(drop)
-	}
-
-	w.Start()
-	go func() {
-		b := newBuffer(tmpl, "abc")
-		w.buffers <- *b
-	}()
-
-	w.write(m)
-	w.write(m)
-	w.write(m)
-
-	select {
-	case <-drop:
-	case <-time.After(1 * time.Second):
-		t.Fatal("Expected buffer to be dropped")
 	}
 }
