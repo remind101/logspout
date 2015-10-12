@@ -2,6 +2,7 @@ package net
 
 import (
 	"net"
+	"os"
 
 	honeybadger "github.com/honeybadger-io/honeybadger-go"
 )
@@ -25,9 +26,11 @@ type UDPConn struct {
 func (conn *UDPConn) Write(b []byte) (int, error) {
 	n, err := conn.UDPConn.Write(b)
 	if err != nil {
-		conn.hb().Notify(err, honeybadger.Context{
-			"data": string(b),
-		})
+		if os.Getenv("HONEYBADGER_API_KEY") != "" {
+			conn.hb().Notify(err, honeybadger.Context{
+				"data": string(b),
+			})
+		}
 	}
 	return n, err
 }
