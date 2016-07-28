@@ -41,4 +41,5 @@ func (a *dogstatsdAdapter) inc(m *router.Message) {
 		tags = append(tags, fmt.Sprintf("%s:%s", k, v))
 	}
 	a.statsd.Count("logspout.message", 1, tags, 1.0)
+	a.statsd.Histogram("logspout.message.size", float64(len(m.Data)), tags, 1.0)
 }
