@@ -8,11 +8,11 @@ import (
 )
 
 func init() {
-	router.AdapterFactories.Register(newDogstatsdAdapter, "metrics")
+	router.AdapterFactories.Register(newDogstatsdAdapter, "dogstatsd")
 }
 
 func newDogstatsdAdapter(route *router.Route) (router.LogAdapter, error) {
-	c, err := statsd.NewBuffered("127.0.0.1:8126", 1000)
+	c, err := statsd.NewBuffered(route.Address, 1000)
 	if err != nil {
 		return nil, fmt.Errorf("error initializing dogstatsd client: %v", err)
 	}
@@ -33,8 +33,8 @@ func (a *dogstatsdAdapter) Stream(logstream chan *router.Message) {
 
 func (a *dogstatsdAdapter) inc(m *router.Message) {
 	tags := []string{
-		fmt.Sprintf("image_name:%s", m.Container.Image),
-		fmt.Sprintf("container_name:%s", m.Container.Name),
+		fmt.Sprintf("image_name:%s", m.Container.Config.Image),
+		fmt.Sprintf("container_name:%s", m.Container.Name[1:]),
 		fmt.Sprintf("container_id:%s", m.Container.ID),
 	}
 	for k, v := range m.Container.Config.Labels {

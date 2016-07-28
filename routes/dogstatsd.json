@@ -1,3 +1,4 @@
 {
-  "adapter": "dogstatsd"
+  "adapter": "dogstatsd",
+  "address": "127.0.0.1:8126"
 }

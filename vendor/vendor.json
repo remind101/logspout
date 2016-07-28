@@ -1,0 +1,13 @@
+{
+	"comment": "",
+	"ignore": "",
+	"package": [
+		{
+			"checksumSHA1": "4M1EgCcu+6tGntb/psF0/Z8Tf9w=",
+			"path": "github.com/DataDog/datadog-go/statsd",
+			"revision": "cc2f4770f4d61871e19bfee967bc767fe730b0d9",
+			"revisionTime": "2016-03-29T13:52:53Z"
+		}
+	],
+	"rootPath": "github.com/remind101/logspout"
+}
