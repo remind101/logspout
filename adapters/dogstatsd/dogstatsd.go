@@ -12,7 +12,7 @@ func init() {
 }
 
 func newDogstatsdAdapter(route *router.Route) (router.LogAdapter, error) {
-	c, err := statsd.NewBuffered(route.Address, 1000)
+	c, err := statsd.New(route.Address)
 	if err != nil {
 		return nil, fmt.Errorf("error initializing dogstatsd client: %v", err)
 	}
