@@ -2,6 +2,7 @@ package adapters
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/DataDog/datadog-go/statsd"
 	"github.com/gliderlabs/logspout/router"
@@ -16,13 +17,18 @@ func newDogstatsdAdapter(route *router.Route) (router.LogAdapter, error) {
 	if err != nil {
 		return nil, fmt.Errorf("error initializing dogstatsd client: %v", err)
 	}
+	labels := labelsFromString(route.Options["labels"])
 	return &dogstatsdAdapter{
 		statsd: c,
+		labels: labels,
 	}, nil
 }
 
 type dogstatsdAdapter struct {
 	statsd *statsd.Client
+
+	// List of labels to include as tags on the metric.
+	labels map[string]bool
 }
 
 func (a *dogstatsdAdapter) Stream(logstream chan *router.Message) {
@@ -34,12 +40,21 @@ func (a *dogstatsdAdapter) Stream(logstream chan *router.Message) {
 func (a *dogstatsdAdapter) inc(m *router.Message) {
 	tags := []string{
 		fmt.Sprintf("image_name:%s", m.Container.Config.Image),
-		fmt.Sprintf("container_name:%s", m.Container.Name[1:]),
-		fmt.Sprintf("container_id:%s", m.Container.ID),
 	}
-	for k, v := range m.Container.Config.Labels {
-		tags = append(tags, fmt.Sprintf("%s:%s", k, v))
+	for name := range a.labels {
+		if v, ok := m.Container.Config.Labels[name]; ok {
+			tags = append(tags, fmt.Sprintf("%s:%s", name, v))
+		}
 	}
 	a.statsd.Count("logspout.message", 1, tags, 1.0)
 	a.statsd.Histogram("logspout.message.size", float64(len(m.Data)), tags, 1.0)
+}
+
+// Splits a comma separated list of labels into a map[string]bool.
+func labelsFromString(s string) map[string]bool {
+	labels := make(map[string]bool)
+	for _, name := range strings.Split(s, ",") {
+		labels[name] = true
+	}
+	return labels
 }
