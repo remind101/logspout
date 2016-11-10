@@ -1,0 +1,20 @@
+machine:
+  environment:
+    GODIST: "go1.7.linux-amd64.tar.gz"
+  post:
+    - mkdir -p download
+    - test -e download/$GODIST || curl -o download/$GODIST https://storage.googleapis.com/golang/$GODIST
+    - sudo rm -rf /usr/local/go
+    - sudo tar -C /usr/local -xzf download/$GODIST
+    - sudo ln -s /usr/local/go/bin/go /usr/bin/go
+    - sudo go install -a -race std
+
+checkout:
+  post:
+    - rm -rf ~/.go_workspace/src/github.com/remind101
+    - mkdir -p ~/.go_workspace/src/github.com/remind101
+    - cp -R ~/logspout ~/.go_workspace/src/github.com/remind101/logspout
+
+test:
+  override:
+    - cd ~/.go_workspace/src/github.com/remind101/logspout && go test -race ./...
