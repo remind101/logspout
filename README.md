@@ -1,5 +1,6 @@
 # logspout
-[![Circle CI](https://circleci.com/gh/remind101/logspout.svg?style=svg&circle-token=f0190152a89c452c606be6ff059434ed926946a0)](https://circleci.com/gh/remind101/logspout)
+
+[![CircleCI](https://circleci.com/gh/remind101/logspout.svg?style=shield&circle-token=f0190152a89c452c606be6ff059434ed926946a0)](https://circleci.com/gh/remind101/logspout)
 
 Our version gliderlabs/logspout with custom modules.
 
