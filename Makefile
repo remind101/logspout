@@ -3,6 +3,9 @@
 build:
 	docker build -t remind101/logspout .
 
+test:
+	go test -race $(shell go list ./... | grep -v /vendor/)
+
 run:
 	docker run --rm \
 		-p 8000:80 \

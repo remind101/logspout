@@ -9,6 +9,10 @@ machine:
     - sudo ln -s /usr/local/go/bin/go /usr/bin/go
     - sudo go install -a -race std
 
+dependencies:
+  override:
+    - /bin/true
+
 checkout:
   post:
     - rm -rf ~/.go_workspace/src/github.com/remind101
@@ -17,4 +21,4 @@ checkout:
 
 test:
   override:
-    - cd ~/.go_workspace/src/github.com/remind101/logspout && go test -race ./...
+    - cd ~/.go_workspace/src/github.com/remind101/logspout && make test
