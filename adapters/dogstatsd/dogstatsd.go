@@ -1,4 +1,4 @@
-package adapters
+package dogstatsd
 
 import (
 	"fmt"
@@ -52,6 +52,10 @@ func (a *dogstatsdAdapter) inc(m *router.Message) {
 
 // Splits a comma separated list of labels into a map[string]bool.
 func labelsFromString(s string) map[string]bool {
+	if s == "" {
+		return nil
+	}
+
 	labels := make(map[string]bool)
 	for _, name := range strings.Split(s, ",") {
 		labels[name] = true
