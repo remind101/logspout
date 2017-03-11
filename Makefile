@@ -1,7 +1,14 @@
 .PHONY: build run
 
+IMAGE=remind101/logspout
+
 build:
-	docker build -t remind101/logspout .
+	docker build -t ${IMAGE} .
+
+bin/logspout: build
+	$(eval ID := $(shell docker create ${IMAGE}))
+	docker cp ${ID}:/bin/logspout bin/logspout
+	docker rm ${ID}
 
 test:
 	go test -race $(shell go list ./... | grep -v /vendor/)

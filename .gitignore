@@ -1,3 +1,4 @@
 .env
 logspout.sublime-project
 logspout.sublime-workspace
+bin/
