@@ -3,6 +3,7 @@ package dogstatsd
 import (
 	"fmt"
 	"strings"
+	"os"
 
 	"github.com/DataDog/datadog-go/statsd"
 	"github.com/gliderlabs/logspout/router"
@@ -32,8 +33,11 @@ type dogstatsdAdapter struct {
 }
 
 func (a *dogstatsdAdapter) Stream(logstream chan *router.Message) {
+	var logspout_dogstatsd_enabled = os.Getenv("LOGSPOUT_DOGSTATSD_ENABLED")
 	for m := range logstream {
-		a.inc(m)
+		if logspout_dogstatsd_enabled != "false" {
+			a.inc(m)
+		}
 	}
 }
 
