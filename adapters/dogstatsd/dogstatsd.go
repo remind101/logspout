@@ -34,8 +34,8 @@ type dogstatsdAdapter struct {
 
 func (a *dogstatsdAdapter) Stream(logstream chan *router.Message) {
 	var logspout_dogstatsd_enabled = os.Getenv("LOGSPOUT_DOGSTATSD_ENABLED")
-	if logspout_dogstatsd_enabled != "false" {
-		for m := range logstream {
+	for m := range logstream {
+		if logspout_dogstatsd_enabled != "false" {
 			a.inc(m)
 		}
 	}
